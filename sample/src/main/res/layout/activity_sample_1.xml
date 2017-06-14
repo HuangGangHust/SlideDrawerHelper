@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:src="@drawable/icon_smile" />
+
+    <!-- 标题栏 -->
+    <include layout="@layout/include_header" />
+    <!-- /标题栏 -->
+
+    <!-- 滑动布局 -->
+    <include layout="@layout/include_slide_parent" />
+    <!-- /滑动布局 -->
+</FrameLayout>
