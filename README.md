@@ -1,7 +1,7 @@
 # SlideDrawerHelper
 垂直方向抽屉滑动效果封装工具库。采用建造者模式简化多种功能配置流程。
 
-[![](https://jitpack.io/v/HuangGangHust/DragPhotoView.svg)](https://jitpack.io/#HuangGangHust/SlideDrawerHelper)
+[![](https://jitpack.io/v/HuangGangHust/SlideDrawerHelper.svg)](https://jitpack.io/#HuangGangHust/SlideDrawerHelper)
 
 [下载示例APK体验](https://github.com/HuangGangHust/SlideDrawerHelper/raw/master/SlideDrawerHelper-debug.apk)
 
@@ -100,9 +100,10 @@
 
 5.    滑动动画持续时间(ms) 配置
 
-         在调用 **SlideDrawerHelper.Builder** 的 `build()` 之前，调用 `animDuration(long animDuration)` 方法。
+      在调用 **SlideDrawerHelper.Builder** 的 `build()` 之前，调用 `animDuration(long animDuration)` 方法。
 
-         使用示例：
+      使用示例：
+
       ```java
       new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
         // 设置滑动动画的执行时间(ms)
@@ -113,49 +114,49 @@
 
 6.    设置滑动联动动画
 
-         实现滑动抽屉监听接口 **SlideDrawerListener** ，并通过 **SlideDrawerHelper** 的 `setSlideDrawerListener(SlideDrawerListener slideDrawerListener)` 方法进行绑定。
+      实现滑动抽屉监听接口 **SlideDrawerListener** ，并通过 **SlideDrawerHelper** 的 `setSlideDrawerListener(SlideDrawerListener slideDrawerListener)` 方法进行绑定。
 
-         使用示例：拖动/滑动过程中 mTestView 控件透明度相应变化。
+      使用示例：拖动/滑动过程中 mTestView 控件透明度相应变化。
       ```java
       mSlideDrawerHelper.setSlideDrawerListener(new SlideDrawerListener() {
-        @Override
-        public void init(SlideDrawerHelper.SlideParentHeight initHeightState) {
-          // SlideDrawerHelper 初始化回调
-        }
-        
-        @Override
-        public void onDragUpdate(int currentHeight, int moveDistanceY) {
-          // 手指拖动布局滑动过程中回调
-          if (currentHeight > mSlideDrawerHelper.getMinHeight()) {
-            mTestView.setAlpha((float) currentHeight / mSlideDrawerHelper.getMaxHeight());
-          } else {
-            mTestView.setAlpha(0.1f);
+          @Override
+          public void init(SlideDrawerHelper.SlideParentHeight initHeightState) {
+            // SlideDrawerHelper 初始化回调
           }
-        }
+        
+          @Override
+          public void onDragUpdate(int currentHeight, int moveDistanceY) {
+              // 手指拖动布局滑动过程中回调
+              if (currentHeight > mSlideDrawerHelper.getMinHeight()) {
+                  mTestView.setAlpha((float) currentHeight / mSlideDrawerHelper.getMaxHeight());
+              } else {
+                  mTestView.setAlpha(0.1f);
+              }
+          }
 
-        @Override
-        public void onSlideUpdate(int currentHeight, float targetHeight, ValueAnimator animation) {
-          // 松口手指后，布局自动滑动过程中回调
-          long currentPlayTime = animation.getCurrentPlayTime();
-          long duration = animation.getDuration();
-          Log.d(TAG, "滑动布局目标高度：" + targetHeight
-                + "，滑动布局当前高度：" + currentHeight
-                + "，动画总时间(ms)：" + duration
-                + "，已执行时间(ms)：" + currentPlayTime
-                + "，动画执行进度：" + (float) currentPlayTime / duration);
-        }
+          @Override
+          public void onSlideUpdate(int currentHeight, float targetHeight, ValueAnimator animation) {
+              // 松口手指后，布局自动滑动过程中回调
+              long currentPlayTime = animation.getCurrentPlayTime();
+              long duration = animation.getDuration();
+              Log.d(TAG, "滑动布局目标高度：" + targetHeight
+                      + "，滑动布局当前高度：" + currentHeight
+                      + "，动画总时间(ms)：" + duration
+                      + "，已执行时间(ms)：" + currentPlayTime
+                      + "，动画执行进度：" + (float) currentPlayTime / duration);
+          }
         
-        @Override
-        public Animator slideAttachAnim(int currentHeight, float targetHeight, long animDuration) {
-          // 布局自动滑动过程中，联动执行的动画（该方法返回的Animator）
-          if (targetHeight > mSlideDrawerHelper.getMediumHeight()) {
-            return ObjectAnimator.ofFloat(mTestView, "alpha", 1f);
+          @Override
+          public Animator slideAttachAnim(int currentHeight, float targetHeight, long animDuration) {
+              // 布局自动滑动过程中，联动执行的动画（该方法返回的Animator）
+              if (targetHeight > mSlideDrawerHelper.getMediumHeight()) {
+                  return ObjectAnimator.ofFloat(mTestView, "alpha", 1f);
+              }
+              if (targetHeight > mSlideDrawerHelper.getMinHeight()) {
+                  return ObjectAnimator.ofFloat(mTestView, "alpha", 0.5f);
+              }
+              return ObjectAnimator.ofFloat(mTestView, "alpha", 0.1f);
           }
-          if (targetHeight > mSlideDrawerHelper.getMinHeight()) {
-            return ObjectAnimator.ofFloat(mTestView, "alpha", 0.5f);
-          }
-          return ObjectAnimator.ofFloat(mTestView, "alpha", 0.1f);
-        }
       });
       ```
 
