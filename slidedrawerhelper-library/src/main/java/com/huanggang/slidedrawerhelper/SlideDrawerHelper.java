@@ -305,6 +305,32 @@ public class SlideDrawerHelper {
             }
         });
 
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                if (null != mSlideDrawerListener) {
+                    mSlideDrawerListener.onSlideStart(slideParentParams.height, targetHeight, animation);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (null != mSlideDrawerListener) {
+                    mSlideDrawerListener.onSlideEnd(slideParentParams.height, targetHeight, animation);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
         Animator anim;
         if (null != mSlideDrawerListener &&
                 null != (anim = mSlideDrawerListener.slideAttachAnim(slideParentParams.height, targetHeight, animDuration))) {
@@ -376,8 +402,8 @@ public class SlideDrawerHelper {
         slideParentLayout.setLayoutParams(slideParentParams);
     }
 
-    public void setmSlideDrawerListener(SlideDrawerListener mSlideDrawerListener) {
-        this.mSlideDrawerListener = mSlideDrawerListener;
+    public void setSlideDrawerListener(SlideDrawerListener slideDrawerListener) {
+        this.mSlideDrawerListener = slideDrawerListener;
     }
 
     /**

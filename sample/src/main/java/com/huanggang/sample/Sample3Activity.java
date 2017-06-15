@@ -55,7 +55,15 @@ public class Sample3Activity extends AppCompatActivity implements View.OnClickLi
                 .animDuration(200)
                 .build();
 
-        mSlideDrawerHelper.setmSlideDrawerListener(new SlideDrawerListener() {
+//        // 若只需要设置SlideDrawerListener的部分操作（eg：滑动联动动画，或滑动开始和结束的特殊操作等），
+//        // 可以使用SlideAnimAttacher或其子类，实现所需的对应方法，再setSlideDrawerListener(slideAnimAttacher)。
+//        mSlideDrawerHelper.setSlideDrawerListener(new SlideAnimAttacher() {
+//            @Override
+//            public Animator slideAttachAnim(int currentHeight, float targetHeight, long animDuration) {
+//                return null;
+//            }
+//        });
+        mSlideDrawerHelper.setSlideDrawerListener(new SlideDrawerListener() {
             @Override
             public void init(SlideDrawerHelper.SlideParentHeight initHeightState) {
 
@@ -90,6 +98,16 @@ public class Sample3Activity extends AppCompatActivity implements View.OnClickLi
                     return ObjectAnimator.ofFloat(tvComeOnBaby, "alpha", 0.5f);
                 }
                 return ObjectAnimator.ofFloat(tvComeOnBaby, "alpha", 0.1f);
+            }
+
+            @Override
+            public void onSlideStart(int height, float targetHeight, Animator animation) {
+				// 滑动动画开始时回调
+            }
+
+            @Override
+            public void onSlideEnd(int height, float targetHeight, Animator animation) {
+				// 滑动动画结束时回调
             }
         });
     }

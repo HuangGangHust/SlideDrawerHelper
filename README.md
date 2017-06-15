@@ -1,5 +1,5 @@
 # SlideDrawerHelper
-垂直方向抽屉滑动效果封装工具库。采用建造者模式简化多种功能配置流程。
+垂直方向抽屉滑动效果封装工具库。采用建造者模式简化多种功能配置流程，一行代码搞定垂直抽屉滑动。
 
 [![](https://jitpack.io/v/HuangGangHust/SlideDrawerHelper.svg)](https://jitpack.io/#HuangGangHust/SlideDrawerHelper)
 
@@ -7,15 +7,16 @@
 
 ## 功能
 
-1. 支持上、下两段式垂直抽屉滑动；
-2. 支持上、中、下三段式垂直抽屉滑动；
-3. 支持点击布局自动滑动和手指拖动布局滑动；
-4. 支持设置滑动联动动画；
-5. 支持滑动布局初始化或滑动过程中，进行用户所需的其他操作；
-6. 支持不同高度阈值配置；
-7. 支持设置初始化布局位置；
-8. 支持滑动动画持续时间配置；
-9. ……
+1. 一行代码搞定垂直抽屉滑动；
+2. 支持上、下两段式垂直抽屉滑动；
+3. 支持上、中、下三段式垂直抽屉滑动；
+4. 支持点击布局自动滑动和手指拖动布局滑动；
+5. 支持设置滑动联动动画；
+6. 支持滑动布局初始化或滑动开始、结束以及进行过程中，进行用户所需的其他操作；
+7. 支持不同高度阈值配置；
+8. 支持设置初始化布局位置；
+9. 支持滑动动画持续时间配置；
+10. ……
 
 
 
@@ -56,32 +57,32 @@
 
 2.    上、下两段式垂直抽屉滑动：
 
-      在调用 **SlideDrawerHelper.Builder** 的 `build()` 之前，调用 `removeMediumHeightState(true)` 方法。
+         在调用 **SlideDrawerHelper.Builder** 的 `build()` 之前，调用 `removeMediumHeightState(true)` 方法。
 
-      使用示例：
+         使用示例：
 
       ```java
-      new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
-        .removeMediumHeightState(true)// 移除中间高度状态
-        .build();
+         new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
+           .removeMediumHeightState(true)// 移除中间高度状态
+           .build();
       ```
 
 3.    不同高度阈值配置：
 
-      在调用 **SlideDrawerHelper.Builder** 的 `build()` 之前，调用 `slideThreshold(minHeight, mediumHeight, maxHeight)` 方法或 `slidePercentThreshold(minHeightPercent, mediumHeightPercent, maxHeightPercent)` 方法。默认滑动布局的minHeight、mediumHeight、maxHeight与屏幕高度的比例依次为：1/12，1/2，1。
+         在调用 **SlideDrawerHelper.Builder** 的 `build()` 之前，调用 `slideThreshold(minHeight, mediumHeight, maxHeight)` 方法或 `slidePercentThreshold(minHeightPercent, mediumHeightPercent, maxHeightPercent)` 方法。默认滑动布局的minHeight、mediumHeight、maxHeight与屏幕高度的比例依次为：1/12，1/2，1。
 
-      使用示例：
+         使用示例：
 
       ```java
-      new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
-        // 设置滑动上、中、下三段布局阈值高度
-        .slideThreshold(160, 960, 1920)
-        .build();
-      或：
-      new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
-        // 设置滑动上、中、下三段布局阈值高度与屏幕高度的比例
-        .slidePercentThreshold(0.1f, 0.5f, 1f)
-        .build();
+         new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
+           // 设置滑动上、中、下三段布局阈值高度
+           .slideThreshold(160, 960, 1920)
+           .build();
+         或：
+         new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
+           // 设置滑动上、中、下三段布局阈值高度与屏幕高度的比例
+           .slidePercentThreshold(0.1f, 0.5f, 1f)
+           .build();
       ```
 
 
@@ -100,21 +101,37 @@
 
 5.    滑动动画持续时间(ms) 配置
 
-      在调用 **SlideDrawerHelper.Builder** 的 `build()` 之前，调用 `animDuration(long animDuration)` 方法。
+         在调用 **SlideDrawerHelper.Builder** 的 `build()` 之前，调用 `animDuration(long animDuration)` 方法。
 
-      使用示例：
+         使用示例：
 
       ```java
-      new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
-        // 设置滑动动画的执行时间(ms)
-        .animDuration(200)
-        .build();
+         new SlideDrawerHelper.Builder(dragLayout, slideParentLayout)
+           // 设置滑动动画的执行时间(ms)
+           .animDuration(200)
+           .build();
       ```
 
 
 6.    设置滑动联动动画
 
-      实现滑动抽屉监听接口 **SlideDrawerListener** ，并通过 **SlideDrawerHelper** 的 `setSlideDrawerListener(SlideDrawerListener slideDrawerListener)` 方法进行绑定。
+      若需要设置滑动联动动画，或滑动开始和结束的特殊操作等，可以使用 **SlideAnimAttacher** 或其子类，实现所需的对应方法，再调用 `setSlideDrawerListener(slideDrawerListener)` 。 （**SlideAnimAttacher** 为实现 **SlideDrawerListener** 部分常用方法的抽象类）
+
+      使用示例：
+
+      ```java
+      mSlideDrawerHelper.setSlideDrawerListener(new SlideAnimAttacher() {
+          @Override
+          public Animator slideAttachAnim(int currentHeight, float targetHeight, long animDuration) {
+            // 返回滑动联动动画即可
+            return null;
+          }
+      });
+      ```
+
+      也可以：
+
+      自行实现滑动抽屉监听接口 **SlideDrawerListener** ，并通过 **SlideDrawerHelper** 的 `setSlideDrawerListener(SlideDrawerListener slideDrawerListener)` 方法进行绑定。
 
       使用示例：拖动/滑动过程中 mTestView 控件透明度相应变化。
       ```java
@@ -159,10 +176,11 @@
           }
       });
       ```
+      ​
 
 7.    滑动布局初始化或滑动过程中，进行用户所需的其他操作
 
-      使用方法同第6条。
+         使用方法类同第6条。
 
 
 

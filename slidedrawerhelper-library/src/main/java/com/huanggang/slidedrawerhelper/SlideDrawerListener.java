@@ -48,4 +48,22 @@ public interface SlideDrawerListener {
      * @return 滑动动画执行时需要伴随执行的动画。不需要时，返回null即可；需要时实现此方法并将对应动画返回。
      */
     Animator slideAttachAnim(int currentHeight, float targetHeight, long animDuration);
+
+    /**
+     * 滑动动画更新回调
+     *
+     * @param currentHeight 滑动总布局当前高度
+     * @param targetHeight  滑动目标高度
+     * @param animation     当前滑动动画
+     */
+    void onSlideStart(int currentHeight, float targetHeight, Animator animation);
+
+    /**
+     * 滑动动画更新回调
+     *
+     * @param currentHeight 滑动总布局当前高度
+     * @param targetHeight  滑动目标高度
+     * @param animation     当前滑动动画
+     */
+    void onSlideEnd(int currentHeight, float targetHeight, Animator animation);
 }
