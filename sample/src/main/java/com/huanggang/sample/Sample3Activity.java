@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -42,21 +41,26 @@ public class Sample3Activity extends AppCompatActivity implements View.OnClickLi
         Button btnToMax = (Button) findViewById(R.id.btn_to_max);
         btnToMax.setOnClickListener(this);
         LinearLayout llSlideParent = (LinearLayout) findViewById(R.id.ll_slide_parent);
-        FrameLayout flDrag = (FrameLayout) findViewById(R.id.fl_drag);
         tvComeOnBaby = (TextView) findViewById(R.id.tv_come_on_baby);
 
         // 低、中、高三段上下滑抽屉效果
-        mSlideDrawerHelper = new SlideDrawerHelper.Builder(flDrag, llSlideParent)
+        // 可设置拖动布局为整个底部抽屉的父布局，则对于整个底部抽屉的子控件未消费触摸事件的区域，均可拖动或点击
+        mSlideDrawerHelper = new SlideDrawerHelper.Builder(llSlideParent, llSlideParent)
                 // 设置滑动总布局初始化高度状态为最大高度
                 .initHeightState(SlideDrawerHelper.SlideParentHeight.MAX_HEIGHT)
                 // 设置滑动低、中、高三段的阈值
                 .slideThreshold(160, 960, 1920)
+//                // 点击拖动布局时不自动滑动
+//                .clickSlidable(false)
+//                // 若需要布局处于中间时，点击布局也不自动滑动，可设置mediumClickSlideState(SlideDrawerHelper.SlideState.CLICK_DOWN)
+//                // 或SlideDrawerHelper.SlideState.CLICK_UP
+//                .mediumClickSlideState(SlideDrawerHelper.SlideState.CLICK_DOWN)
                 // 设置滑动动画的执行时间
                 .animDuration(200)
                 .build();
 
 //        // 若只需要设置SlideDrawerListener的部分操作（eg：滑动联动动画，或滑动开始和结束的特殊操作等），
-//        // 可以使用SlideAnimAttacher或其子类，实现所需的对应方法，再setSlideDrawerListener(slideAnimAttacher)。
+//        // 可以使用SlideAnimAttacher或其子类，实现所需的对应方法，再setSlideDrawerListener(slideAnimAttacher)。例如：
 //        mSlideDrawerHelper.setSlideDrawerListener(new SlideAnimAttacher() {
 //            @Override
 //            public Animator slideAttachAnim(int currentHeight, float targetHeight, long animDuration) {
@@ -102,12 +106,12 @@ public class Sample3Activity extends AppCompatActivity implements View.OnClickLi
 
             @Override
             public void onSlideStart(int height, float targetHeight, Animator animation) {
-				// 滑动动画开始时回调
+                // 滑动动画开始时回调
             }
 
             @Override
             public void onSlideEnd(int height, float targetHeight, Animator animation) {
-				// 滑动动画结束时回调
+                // 滑动动画结束时回调
             }
         });
     }

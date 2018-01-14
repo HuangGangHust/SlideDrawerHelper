@@ -30,8 +30,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 启动Activity
      */
     private <T extends Activity> void startActivity(Class<T> activityClass) {
-        Intent intent = new Intent(this, activityClass);
-        startActivity(intent);
+        startActivity(new Intent(this, activityClass));
     }
 
     @Override

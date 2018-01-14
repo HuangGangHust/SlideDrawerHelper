@@ -38,7 +38,7 @@
 
    ```groovy
    dependencies {
-       compile 'com.github.HuangGangHust:SlideDrawerHelper:1.0.0'
+       compile 'com.github.HuangGangHust:SlideDrawerHelper:1.0.1'
    }
    ```
 

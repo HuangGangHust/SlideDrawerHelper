@@ -24,7 +24,6 @@ import android.view.ViewGroup;
  */
 public class SlideDrawerHelper {
     private static final String TAG = SlideDrawerHelper.class.getSimpleName();
-    private static final int screenHeight = MeasureUtils.getCurScreenHeight();// 屏幕高度
     /**
      * minHeight：滑动布局最小显示高度；
      * mediumHeight：滑动布局中等显示高度；
@@ -35,33 +34,39 @@ public class SlideDrawerHelper {
     // 滑动菜单高度状态
     private SlideParentHeight mSlideParentHeight;
     /**
-     * 滑动菜单高度状态为中间时，点击滑动布局，对应滑动状态（SlideState.DOWN：向下滑 或 SlideState.UP：向上滑）。
-     * 默认为SlideState.DOWN。
+     * 滑动菜单高度状态为中间时，点击滑动布局，对应滑动状态（SlideState.SLIDE_DOWN：向下滑 或 SlideState.SLIDE_UP：向上滑）。
+     * 默认为SlideState.SLIDE_DOWN。
      */
-    private SlideState mediumClickSlideState = SlideState.DOWN;
+    private SlideState mediumClickSlideState = SlideState.SLIDE_DOWN;
     private boolean removeMediumHeightState = false;// 是否移除滑动布局中间高度状态。默认为false
     /**
-     * dragLayout：滑动触发布局，可拖动或点击；
-     * slideParentLayout：滑动总布局
+     * 点击拖动布局是否会自动滑动。默认为true。
+     * 若需要布局处于中间时，点击布局也不自动滑动，可设置{@link Builder#mediumClickSlideState(SlideState)}为
+     * {@link SlideState#CLICK_UP}或{@link SlideState#CLICK_DOWN}。
      */
-    private ViewGroup dragLayout, slideParentLayout;
+    private boolean clickSlidable = true;
+    /**
+     * 滑动总布局
+     */
+    private ViewGroup slideParentLayout;
     private ViewGroup.LayoutParams slideParentParams;
-    private float downY, downRawY, upRawY;
+    private float downY;
+    private float downRawY;
     private SlideDrawerListener mSlideDrawerListener;
 
     /**
      * @param builder SlideDrawerHelper建造者
      */
     private SlideDrawerHelper(@NonNull Builder builder) {
-        this.dragLayout = builder.dragLayout;
+        ViewGroup dragLayout = builder.dragLayout;// 滑动触发布局，可拖动或点击
         this.slideParentLayout = builder.slideParentLayout;
         this.minHeight = builder.minHeight;
         this.mediumHeight = builder.mediumHeight;
         this.maxHeight = builder.maxHeight;
         this.animDuration = builder.animDuration;
         this.removeMediumHeightState = builder.removeMediumHeightState;
+        this.clickSlidable = builder.clickSlidable;
         this.mediumClickSlideState = builder.mediumClickSlideState;
-
         dragLayout.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -88,14 +93,11 @@ public class SlideDrawerHelper {
             throw new IllegalArgumentException("You can't set SlideParentHeight.MEDIUM_HEIGHT after calling removeMediumHeightState(true).");
         }
         mSlideParentHeight = initHeightState;
-        int initHeight = getInitHeight(initHeightState);
-//        ViewGroup.LayoutParams dragLayoutParams = dragLayout.getLayoutParams();// 滑动标题栏布局属性；滑动总布局属性
-//        dragLayoutParams.height = initHeight;
-//        dragLayout.setLayoutParams(dragLayoutParams);
+//        int initHeight = getInitHeight(initHeightState);
 
         // 滑动总布局高度赋值给panlHeight
         slideParentParams = slideParentLayout.getLayoutParams();
-        slideParentParams.height = initHeight;
+        slideParentParams.height = getInitHeight(initHeightState);
         slideParentLayout.setLayoutParams(slideParentParams);
 
         if (null != mSlideDrawerListener) {
@@ -142,7 +144,7 @@ public class SlideDrawerHelper {
 
             case MotionEvent.ACTION_UP:// 手指离开屏幕
                 // 获取屏幕坐标
-                upRawY = event.getRawY();
+                float upRawY = event.getRawY();
                 // 手离开屏幕时，滑动状态判断
                 SlideState currentSlideState = slideStateJudge(downRawY, upRawY);
                 slideAnim(currentSlideState);
@@ -186,20 +188,20 @@ public class SlideDrawerHelper {
      */
     private SlideState slideStateJudge(float downRawY, float upRawY) {
         if (upRawY - downRawY > 5) {// 下滑
-            return SlideState.DOWN;
+            return SlideState.SLIDE_DOWN;
         }
 
         if (upRawY - downRawY < -5) {// 上滑
-            return SlideState.UP;
+            return SlideState.SLIDE_UP;
         }
 
         // 若手离开屏幕时，y坐标基本没改变（变动绝对值小于5px），说明没有滑动，只是点击
         if (mSlideParentHeight == SlideParentHeight.MIN_HEIGHT) {// 点击时，滑动布局处于底部，则上滑
-            return SlideState.UP;
+            return SlideState.CLICK_UP;
         }
 
         if (mSlideParentHeight == SlideParentHeight.MAX_HEIGHT) {// 点击时，滑动布局处于顶部，则下滑
-            return SlideState.DOWN;
+            return SlideState.CLICK_DOWN;
         }
 
         // 点击时，滑动布局处于中间，对应滑动状态
@@ -212,15 +214,17 @@ public class SlideDrawerHelper {
      * @param currentSlideState 当前滑动状态
      */
     private void slideAnim(SlideState currentSlideState) {
-        if (currentSlideState == SlideState.UP) {
+        if (currentSlideState == SlideState.SLIDE_UP || (clickSlidable && currentSlideState == SlideState.CLICK_UP)) {
             // 上滑
-            handleUpSlide(upRawY);
+//            handleUpSlide(upRawY);
+            handleUpSlide(slideParentParams.height);
             return;
         }
 
-        if (currentSlideState == SlideState.DOWN) {
+        if (currentSlideState == SlideState.SLIDE_DOWN || (clickSlidable && currentSlideState == SlideState.CLICK_DOWN)) {
             // 下滑
-            handleDownSlide(upRawY);
+//            handleDownSlide(upRawY);
+            handleDownSlide(slideParentParams.height);
         }
     }
 
@@ -230,21 +234,24 @@ public class SlideDrawerHelper {
      * @param rawY 屏幕点Y坐标
      */
     private void handleUpSlide(float rawY) {
-        if (removeMediumHeightState) {// 已取消滑动布局中间高度状态
-            if (rawY > screenHeight - getMaxHeight() && rawY < screenHeight) {
+        // 已取消滑动布局中间高度状态
+        if (removeMediumHeightState) {
+//            if (rawY > screenHeight - getMaxHeight() && rawY < screenHeight) {
+            if (rawY > getMinHeight() && rawY < getMaxHeight()) {
                 slideAnimation(getMaxHeight());
                 mSlideParentHeight = SlideParentHeight.MAX_HEIGHT;
             }
             return;
         }
 
-        if (rawY > screenHeight - getMaxHeight() && rawY <= screenHeight - getMediumHeight() + getMinHeight()) {
+//        if (rawY > screenHeight - getMaxHeight() && rawY <= screenHeight - getMediumHeight() + getMinHeight()) {
+        if (rawY >= getMediumHeight() && rawY < getMaxHeight()) {
             slideAnimation(getMaxHeight());
             mSlideParentHeight = SlideParentHeight.MAX_HEIGHT;
             return;
         }
 
-        if (rawY > screenHeight - getMediumHeight() && rawY < screenHeight) {
+        if (rawY > getMinHeight() && rawY < getMediumHeight()) {
             slideAnimation(getMediumHeight());
             mSlideParentHeight = SlideParentHeight.MEDIUM_HEIGHT;
         }
@@ -257,20 +264,23 @@ public class SlideDrawerHelper {
      */
     private void handleDownSlide(float rawY) {
         if (removeMediumHeightState) {// 已取消滑动布局中间高度状态
-            if (rawY >= screenHeight - getMaxHeight() && rawY < screenHeight) {
+//            if (rawY >= screenHeight - getMaxHeight() && rawY < screenHeight) {
+            if (rawY > getMinHeight() && rawY < getMaxHeight()) {
                 slideAnimation(getMinHeight());
                 mSlideParentHeight = SlideParentHeight.MIN_HEIGHT;
             }
             return;
         }
 
-        if (rawY >= screenHeight - getMaxHeight() && rawY < screenHeight - getMediumHeight()) {
+//        if (rawY >= screenHeight - getMaxHeight() && rawY < screenHeight - getMediumHeight()) {
+        if (rawY > getMediumHeight() && rawY <= getMaxHeight()) {
             slideAnimation(getMediumHeight());
             mSlideParentHeight = SlideParentHeight.MEDIUM_HEIGHT;
             return;
         }
 
-        if (rawY >= screenHeight - getMediumHeight() && rawY < screenHeight) {
+//        if (rawY >= screenHeight - getMediumHeight() && rawY < screenHeight) {
+        if (rawY > getMinHeight() && rawY <= getMediumHeight()) {
             slideAnimation(getMinHeight());
             mSlideParentHeight = SlideParentHeight.MIN_HEIGHT;
         }
@@ -341,6 +351,10 @@ public class SlideDrawerHelper {
         animSet.start();
     }
 
+    public SlideParentHeight getSlideParentHeight() {
+        return mSlideParentHeight;
+    }
+
     /**
      * 设置滑动父布局高度状态
      *
@@ -408,10 +422,10 @@ public class SlideDrawerHelper {
 
     /**
      * 滑动状态枚举类。
-     * UP：上滑；DOWN：下滑
+     * SLIDE_UP：上滑；SLIDE_DOWN：下滑
      */
     public enum SlideState {
-        UP, DOWN
+        SLIDE_UP, SLIDE_DOWN, CLICK_UP, CLICK_DOWN
     }
 
     /**
@@ -440,14 +454,15 @@ public class SlideDrawerHelper {
          */
         private int minHeight = screenHeight / 12, mediumHeight = screenHeight / 2, maxHeight = 9 * screenHeight / 10;
         private boolean removeMediumHeightState = false;// 是否移除滑动布局中间高度状态。默认为false
+        private boolean clickSlidable = true;// 点击拖动布局是否会自动滑动。默认为true
         /**
-         * 滑动菜单高度状态为中间时，点击滑动布局，对应滑动状态（SlideState.DOWN：向下滑 或 SlideState.UP：向上滑）。
-         * 默认为SlideState.DOWN。
+         * 滑动菜单高度状态为中间时，点击滑动布局，对应滑动状态（SlideState.SLIDE_DOWN：向下滑 或 SlideState.SLIDE_UP：向上滑）。
+         * 默认为SlideState.SLIDE_DOWN。
          */
-        private SlideState mediumClickSlideState = SlideState.DOWN;
+        private SlideState mediumClickSlideState = SlideState.SLIDE_DOWN;
 
         /**
-         * @param dragLayout        滑动触发布局，可拖动或点击
+         * @param dragLayout        滑动触发布局，可拖动或点击。可设置与slideParentLayout为同一个布局
          * @param slideParentLayout 滑动总布局
          */
         public Builder(@NonNull ViewGroup dragLayout, @NonNull ViewGroup slideParentLayout) {
@@ -527,6 +542,18 @@ public class SlideDrawerHelper {
         }
 
         /**
+         * 是否允许点击拖动布局，自动滑动。
+         *
+         * @param clickSlidable 点击拖动布局是否会自动滑动。默认为true。
+         *                      若需要布局处于中间时，点击布局也不自动滑动，可设置{@link Builder#mediumClickSlideState(SlideState)}为
+         *                      {@link SlideState#CLICK_UP}或{@link SlideState#CLICK_DOWN}。
+         */
+        public Builder clickSlidable(boolean clickSlidable) {
+            this.clickSlidable = clickSlidable;
+            return this;
+        }
+
+        /**
          * 设置自动滑动动画的执行时间
          *
          * @param animDuration 动画执行时间（ms）
@@ -538,7 +565,7 @@ public class SlideDrawerHelper {
 
         /**
          * 滑动总布局处于中间高度时，点击滑动触发布局，对应滑动状态。
-         * 默认为SlideState.DOWN
+         * 默认为SlideState.SLIDE_DOWN
          *
          * @param slideState 目标滑动状态。
          */
